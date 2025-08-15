@@ -9,6 +9,7 @@ class VelocityPublisher : public rclcpp::Node {
  public:
   VelocityPublisher() : Node("laser_subscriber") {
     laser_subscriber =
+        // TODO: Redact everything to subscriber : {
         this->create_subscription<geometry_msgs::msg::Twist>("/diff_drive/cmd_vel", 10);
     timer_ = this->create_wall_timer(500ms, std::bind(&VelocityPublisher::publishVelocity, this));
   }

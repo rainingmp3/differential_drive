@@ -3,7 +3,7 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-using namespace std::chrono_literals;  // create_wall_timer için
+using namespace std::chrono_literals;
 
 class VelocityPublisher : public rclcpp::Node {
  public:
