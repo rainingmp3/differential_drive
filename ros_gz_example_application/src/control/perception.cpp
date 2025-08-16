@@ -1,34 +1,26 @@
 #include <chrono>
 
-// #include "geometry_msgs/msg/twist.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "sensor_msgs/msg/laser_scan.hpp"
 
-using namespace std::chrono_literals;
-
-class VelocityPublisher : public rclcpp::Node {
+class LaserSubscriber : public rclcpp::Node {
  public:
-  VelocityPublisher() : Node("laser_subscriber") {
-    laser_subscriber =
-        // TODO: Redact everything to subscriber : {
-        this->create_subscription<geometry_msgs::msg::Twist>("/diff_drive/cmd_vel", 10);
-    timer_ = this->create_wall_timer(500ms, std::bind(&VelocityPublisher::publishVelocity, this));
+  LaserSubscriber() : Node("laser_subscriber") {
+    auto callback = [this](const sensor_msgs::msg::LaserScan::SharedPtr msg) {
+      // RCLCPP_INFO(this->get_logger(), "Got a sensor msg %f", msg->scan_time);
+      RCLCPP_INFO(this->get_logger(), "Got a sensor msg");
+    };
+    subscription_ =
+        this->create_subscription<sensor_msgs::msg::LaserScan>("/diff_drive/scan", 1, callback);
   }
 
  private:
-  void publishVelocity() {
-    auto vel_msg = geometry_msgs::msg::Twist();
-    vel_msg.linear.x = 1.0;
-    vel_publisher->publish(vel_msg);
-    RCLCPP_INFO(this->get_logger(), "Published velocity");
-  }
-
-  rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr vel_publisher;
+  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr subscription_;
 };
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<VelocityPublisher>());
+  rclcpp::spin(std::make_shared<LaserSubscriber>());
   rclcpp::shutdown();
   return 0;
 }
