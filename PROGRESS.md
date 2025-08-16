@@ -8,3 +8,7 @@ fri aug 15 log 2 \
 
 add basic perception: [ ] use lidar sensor
     learn and find topics like /goal_pose, /diff_drive/scan
+
+sat aug 16
+
+the issue with logging, for som reason subscriber logging doesnt work, everything seems to be fine though ,,,
