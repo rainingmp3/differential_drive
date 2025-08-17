@@ -17,4 +17,5 @@ sun aug 17 log
 
 so, the issue was launch file wich held old node, which was still working through share dir(it was cached)
 [ ] now we need to properly handle laser scan array, cause now i am misssing something .
-
+[] also learn on imports of xacro, yaml and so on
+[] clean the logs, or log differently

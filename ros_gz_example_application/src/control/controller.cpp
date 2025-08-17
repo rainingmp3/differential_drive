@@ -24,7 +24,7 @@ public:
     vel_publisher = this->create_publisher<geometry_msgs::msg::Twist>(
         "/diff_drive/cmd_vel", 10);
 
-    timer_ = this->create_wall_timer(500ms, timer_callback_); // Subsciber part
+    timer_ = this->create_wall_timer(25ms, timer_callback_); // Subsciber part
 
     subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
         "/diff_drive/scan", 1, laser_callback_);
@@ -41,12 +41,17 @@ private:
   void analyzeScan(const sensor_msgs::msg::LaserScan::SharedPtr msg)
   {
     size_t middle_index = msg->ranges.size() / 2;
-    float distance_forward = msg->ranges[middle_index];
-    if (distance_forward < 0.2){
+    float distance_forward = msg->ranges[middle_index] - lidar_to_front;
+    RCLCPP_INFO(this->get_logger(), "Distance is  %f [m]", distance_forward);
+    if (distance_forward < lidar_to_front + 0.5)
+    {
+      RCLCPP_INFO(this->get_logger(), "WE SURPRASSED IT");
       this->desired_velocity = 0.0f;
     }
   }
+  // Set variables:
   float desired_velocity = 5.0f;
+  float lidar_to_front = 0.854283f;
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr vel_publisher;
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr subscription_;
