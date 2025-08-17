@@ -6,14 +6,11 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-add_executable(velocity_publisher src/control/velocity.cpp)
-add_executable(laser_subscriber src/control/perception.cpp)
-ament_target_dependencies(velocity_publisher  rclcpp geometry_msgs )
-ament_target_dependencies(laser_subscriber rclcpp sensor_msgs)
+add_executable(controller src/control/controller.cpp)
+ament_target_dependencies(controller rclcpp sensor_msgs geometry_msgs)
 
 install(TARGETS
-  velocity_publisher
-  laser_subscriber
+  controller
   DESTINATION lib/${PROJECT_NAME}
 )
 ament_package()

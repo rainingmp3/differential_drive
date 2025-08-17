@@ -54,10 +54,10 @@ def generate_launch_description():
         }.items(),
     )
     # Publishes velocity
-    velocity_publisher = Node(
+    controller = Node(
         package="ros_gz_example_application",
-        executable="velocity_publisher",
-        name="velocity_publisher",
+        executable="controller",
+        name="controller",
         output="both",
         parameters=[
             {"use_sim_time": True},
@@ -110,6 +110,6 @@ def generate_launch_description():
             bridge,
             robot_state_publisher,
             rviz,
-            velocity_publisher,
+            controller
         ]
     )
