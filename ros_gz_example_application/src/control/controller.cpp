@@ -45,7 +45,7 @@ private:
     RCLCPP_INFO(this->get_logger(), "Distance is  %f [m]", distance_forward);
     if (distance_forward < lidar_to_front + 0.5)
     {
-      RCLCPP_INFO(this->get_logger(), "WE SURPRASSED IT");
+      RCLCPP_INFO_ONCE(this->get_logger(), "WE SURPRASSED IT");
       this->desired_velocity = 0.0f;
     }
   }
