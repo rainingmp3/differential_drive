@@ -2,6 +2,7 @@
 #include "geometry_msgs/msg/pose_with_covariance.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
+#include "pid.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include <chrono>
@@ -12,7 +13,9 @@ using namespace std::chrono_literals;
 class ControllerNode : public rclcpp::Node
 {
 public:
-  ControllerNode() : Node("controller_node")
+  ControllerNode()
+      : Node("controller_node"), pid_(kp_, ki_, kd_, max_windup_, max_input_)
+
   {
     auto laser_callback_ =
         [this](const sensor_msgs::msg::LaserScan::SharedPtr msg)
@@ -54,7 +57,7 @@ public:
             "/goal_pose", 1, goal_callback_);
 
     subscription_odom = this->create_subscription<nav_msgs::msg::Odometry>(
-        "/diff_drive/odometry", 1, goal_callback_);
+        "/diff_drive/odometry", 1, odom_callback_);
   }
 
 private:
@@ -76,17 +79,11 @@ private:
       RCLCPP_INFO_ONCE(this->get_logger(), "WE SURPRASSED IT");
       this->desired_velocity = 0.0f;
     }
-
-    // void PIDController(
-    //   k_p,k_i,k_d,
-    // ){
-    //   //
-    }
   }
   // Set variables:
-  float LIDAR_TO_FRONT = 0.854283f; // Distance from Lidar to the front of the car.
+  float LIDAR_TO_FRONT =
+      0.854283f; // Distance from Lidar to the front of the car.
   float desired_velocity = 5.0f;
-
   float position_x;
   float position_y;
   float position_z;
@@ -100,6 +97,15 @@ private:
   float goal_position_y;
   float goal_position_z;
 
+  // PID
+  float kp_ = 1.0f;
+  float ki_ = 1.0f;
+  float kd_ = 1.0f;
+  float max_windup_ = 1.0f;
+  float max_input_ = 1.0f;
+  PIDController pid_;
+  // TODO:
+  // float control_input_x_ = pid_.computeControl(goal_position_x, position_x, time_step)
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr vel_publisher;
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr
