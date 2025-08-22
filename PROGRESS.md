@@ -24,7 +24,12 @@ Edgar Dijkstra seems to be a cool man
 Thu aug 21
 
 Didnt log some stuff
-[] ] PID logic, 3 min deal reall (it wasnt 3 min deal((
+[X] ] PID logic, 3 min deal reall (it wasnt 3 min deal((
 
+Fri aug 22
 Need to add to set timestep [ ]
 How to set sub and pub updatet rates in meaningful way [X]
+THe issue is that diff_drive cant publish max velocity and rotate at the same time -- [ ]
+That was not the issue ...atan2 points in opposite direction [ ]
+
+[ ] reorginize cpp/hpp structure

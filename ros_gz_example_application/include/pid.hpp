@@ -1,5 +1,5 @@
-#ifndef PID_HPP
-#define PID_HPP
+#pragma once
+
 class PIDController
 {
 public:
@@ -11,5 +11,4 @@ private:
   float max_windup_, max_input_;
   float integral_error_, prev_error_;
 };
-#endif // !PID.HPP
 

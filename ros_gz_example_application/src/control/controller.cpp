@@ -29,13 +29,9 @@ public:
       this->goal_position_y = msg->pose.position.y;
       this->goal_position_z = msg->pose.position.z;
 
-      this->goal_qx = msg->pose.orientation.x;
-      this->goal_qy = msg->pose.orientation.y;
-      this->goal_qz = msg->pose.orientation.z;
-      this->goal_qw = msg->pose.orientation.w;
-
-      this->goal_yaw = QuatToYaw(goal_qx, goal_qy, goal_qz, goal_qw);
-      RCLCPP_WARN(this->get_logger(), "goal yaw is %f", goal_yaw);
+      this->goal_yaw =
+          atan2(goal_position_y - position_y, goal_position_x - position_x);
+      RCLCPP_ERROR(this->get_logger(), "goal yaw is %f", goal_yaw);
     };
 
     auto timer_callback_ = [this]()
@@ -55,7 +51,7 @@ public:
 
       this->orientation_yaw =
           QuatToYaw(orientation_x, orientation_y, orientation_z, orientation_w);
-        
+
       RCLCPP_WARN(this->get_logger(), "current yaw is %f", orientation_yaw);
     };
 
@@ -80,6 +76,7 @@ private:
   {
     auto vel_msg = geometry_msgs::msg::Twist();
     vel_msg.linear.x = velocity;
+    vel_msg.angular.z = angular_velocity;
     twist_publisher->publish(vel_msg);
     RCLCPP_WARN(this->get_logger(), "Published velocity %f [m/s]", velocity);
   }
@@ -97,8 +94,8 @@ private:
   }
   float QuatToYaw(float qx, float qy, float qz, float qw)
   {
-    float yaw =
-        atan2(2.0 * (qy * qz + qw * qx), qw * qw - qx * qx - qy * qy + qz * qz);
+    float yaw = atan2(2.0 * (qw * qz + qx * qy),
+                      1.0 - 2.0 * (qy * qy + qz * qz)); // TODO: learn it pls
     return yaw;
   }
 
@@ -110,6 +107,8 @@ private:
     float control_yaw_velocity =
         pid_.computeControl(goal_yaw, orientation_yaw, rate_control);
 
+    RCLCPP_WARN(this->get_logger(), "control angular_velocity is %f",
+                control_yaw_velocity);
     if (obstacle_is_near)
     {
       this->publishTwist(desired_velocity, control_yaw_velocity);
