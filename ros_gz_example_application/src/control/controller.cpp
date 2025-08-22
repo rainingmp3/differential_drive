@@ -7,7 +7,7 @@
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include <chrono>
 #include <cstddef>
-
+#include <math.h>
 using namespace std::chrono_literals;
 
 class ControllerNode : public rclcpp::Node
@@ -27,9 +27,17 @@ public:
       this->goal_position_x = msg->pose.position.x;
       this->goal_position_y = msg->pose.position.y;
       this->goal_position_z = msg->pose.position.z;
+
+      this->goal_qx = msg->pose.orientation.x;
+      this->goal_qy = msg->pose.orientation.y;
+      this->goal_qz = msg->pose.orientation.z;
+      this->goal_qw = msg->pose.orientation.w;
+
+      this->goal_yaw = QuatToYaw(goal_qx, goal_qy, goal_qz, goal_qw);
     };
 
     auto timer_callback_ = [this]()
+      // TODO: Change to computeInputs
     { this->publishVelocity(desired_velocity); }; // Subsciber part
 
     auto odom_callback_ = [this](const nav_msgs::msg::Odometry::SharedPtr msg)
@@ -45,19 +53,19 @@ public:
     };
 
     vel_publisher = this->create_publisher<geometry_msgs::msg::Twist>(
-        "/diff_drive/cmd_vel", 10);
+        "/diff_drive/cmd_vel", rate_control);
 
-    timer_ = this->create_wall_timer(25ms, timer_callback_); // Subsciber part
+    timer_ = this->create_wall_timer(40ms, timer_callback_); // TODO: avoid 25ms
 
     subscription_scan = this->create_subscription<sensor_msgs::msg::LaserScan>(
-        "/diff_drive/scan", 1, laser_callback_);
+        "/diff_drive/scan", rate_lidar, laser_callback_);
 
     subscription_goal =
         this->create_subscription<geometry_msgs::msg::PoseStamped>(
-            "/goal_pose", 1, goal_callback_);
+            "/goal_pose", rate_goal, goal_callback_);
 
     subscription_odom = this->create_subscription<nav_msgs::msg::Odometry>(
-        "/diff_drive/odometry", 1, odom_callback_);
+        "/diff_drive/odometry", rate_odom, odom_callback_);
   }
 
 private:
@@ -80,6 +88,20 @@ private:
       this->desired_velocity = 0.0f;
     }
   }
+  float QuatToYaw(float qx, float qy, float qz, float qw)
+  {
+    float yaw =
+        atan2(2.0 * (qy * qz + qw * qx), qw * qw - qx * qx - qy * qy + qz * qz);
+    return yaw;
+  }
+  // void computeInputs()
+  // {
+  //   float control_velocity =
+  //       pid_.computeControl(goal_position_x, position_x, rate_control);
+  //
+  //   float control_yaw_velocity =
+  //       pid_.computeControl(goal_orientation, yaw, rate_control);
+  // }
   // Set variables:
   float LIDAR_TO_FRONT =
       0.854283f; // Distance from Lidar to the front of the car.
@@ -96,7 +118,18 @@ private:
   float goal_position_x;
   float goal_position_y;
   float goal_position_z;
+  float goal_yaw;
 
+  float goal_qx;
+  float goal_qy;
+  float goal_qz;
+  float goal_qw;
+
+  // Update rates [hz]
+  float rate_lidar = 10;   // Lidar
+  float rate_odom = 50;    // Wheel encoders
+  float rate_control = 25; // Wheel encoders
+  float rate_goal = 1;     // Wheel encoders
   // PID
   float kp_ = 1.0f;
   float ki_ = 1.0f;
@@ -105,7 +138,8 @@ private:
   float max_input_ = 1.0f;
   PIDController pid_;
   // TODO:
-  // float control_input_x_ = pid_.computeControl(goal_position_x, position_x, time_step)
+  // float control_input_x_ = pid_.computeControl(goal_position_x, position_x,
+  // time_step)
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr vel_publisher;
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr

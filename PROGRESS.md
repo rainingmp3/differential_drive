@@ -27,3 +27,4 @@ Didnt log some stuff
 [] ] PID logic, 3 min deal reall (it wasnt 3 min deal((
 
 Need to add to set timestep [ ]
+How to set sub and pyb updaterates in meaningful way [ ]
