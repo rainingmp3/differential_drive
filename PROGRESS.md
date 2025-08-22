@@ -13,7 +13,7 @@ sat aug 16
 
 the issue with logging, for som reason subscriber logging doesnt work, everything seems to be fine though ,,,
 
-sun aug 17 log 
+sun aug 17 log
 
 so, the issue was launch file wich held old node, which was still working through share dir(it was cached)
 [ ] now we need to properly handle laser scan array, cause now i am misssing something .
@@ -21,10 +21,10 @@ so, the issue was launch file wich held old node, which was still working throug
 [x] clean the logs, or log differently
 Edgar Dijkstra seems to be a cool man
 
-Thu aug 21 
+Thu aug 21
 
 Didnt log some stuff
 [] ] PID logic, 3 min deal reall (it wasnt 3 min deal((
 
 Need to add to set timestep [ ]
-How to set sub and pyb updaterates in meaningful way [ ]
+How to set sub and pub updatet rates in meaningful way [X]

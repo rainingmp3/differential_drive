@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cstddef>
 #include <math.h>
+#include <rclcpp/logging.hpp>
 using namespace std::chrono_literals;
 
 class ControllerNode : public rclcpp::Node
@@ -34,11 +35,12 @@ public:
       this->goal_qw = msg->pose.orientation.w;
 
       this->goal_yaw = QuatToYaw(goal_qx, goal_qy, goal_qz, goal_qw);
+      RCLCPP_WARN(this->get_logger(), "goal yaw is %f", goal_yaw);
     };
 
     auto timer_callback_ = [this]()
-      // TODO: Change to computeInputs
-    { this->publishVelocity(desired_velocity); }; // Subsciber part
+    // TODO: Change to computeInputs
+    { this->applyInputs(); }; // Subsciber part
 
     auto odom_callback_ = [this](const nav_msgs::msg::Odometry::SharedPtr msg)
     {
@@ -50,9 +52,14 @@ public:
       this->orientation_y = msg->pose.pose.orientation.y;
       this->orientation_z = msg->pose.pose.orientation.z;
       this->orientation_w = msg->pose.pose.orientation.w;
+
+      this->orientation_yaw =
+          QuatToYaw(orientation_x, orientation_y, orientation_z, orientation_w);
+        
+      RCLCPP_WARN(this->get_logger(), "current yaw is %f", orientation_yaw);
     };
 
-    vel_publisher = this->create_publisher<geometry_msgs::msg::Twist>(
+    twist_publisher = this->create_publisher<geometry_msgs::msg::Twist>(
         "/diff_drive/cmd_vel", rate_control);
 
     timer_ = this->create_wall_timer(40ms, timer_callback_); // TODO: avoid 25ms
@@ -69,19 +76,19 @@ public:
   }
 
 private:
-  void publishVelocity(float velocity)
+  void publishTwist(float velocity, float angular_velocity)
   {
     auto vel_msg = geometry_msgs::msg::Twist();
     vel_msg.linear.x = velocity;
-    vel_publisher->publish(vel_msg);
-    RCLCPP_INFO(this->get_logger(), "Published velocity %f [m/s]", velocity);
+    twist_publisher->publish(vel_msg);
+    RCLCPP_WARN(this->get_logger(), "Published velocity %f [m/s]", velocity);
   }
 
   void analyzeScan(const sensor_msgs::msg::LaserScan::SharedPtr msg)
   {
     size_t middle_index = msg->ranges.size() / 2;
     float distance_forward = msg->ranges[middle_index] - LIDAR_TO_FRONT;
-    RCLCPP_INFO(this->get_logger(), "Distance is  %f [m]", distance_forward);
+    RCLCPP_WARN(this->get_logger(), "Distance is  %f [m]", distance_forward);
     if (distance_forward < LIDAR_TO_FRONT + 0.5)
     {
       RCLCPP_INFO_ONCE(this->get_logger(), "WE SURPRASSED IT");
@@ -94,15 +101,28 @@ private:
         atan2(2.0 * (qy * qz + qw * qx), qw * qw - qx * qx - qy * qy + qz * qz);
     return yaw;
   }
-  // void computeInputs()
-  // {
-  //   float control_velocity =
-  //       pid_.computeControl(goal_position_x, position_x, rate_control);
-  //
-  //   float control_yaw_velocity =
-  //       pid_.computeControl(goal_orientation, yaw, rate_control);
-  // }
+
+  void applyInputs()
+  {
+    float control_velocity =
+        pid_.computeControl(goal_position_x, position_x, rate_control);
+
+    float control_yaw_velocity =
+        pid_.computeControl(goal_yaw, orientation_yaw, rate_control);
+
+    if (obstacle_is_near)
+    {
+      this->publishTwist(desired_velocity, control_yaw_velocity);
+    }
+    else
+    {
+
+      this->publishTwist(control_velocity, control_yaw_velocity);
+    }
+  }
+
   // Set variables:
+  bool obstacle_is_near = 0;
   float LIDAR_TO_FRONT =
       0.854283f; // Distance from Lidar to the front of the car.
   float desired_velocity = 5.0f;
@@ -114,6 +134,7 @@ private:
   float orientation_y;
   float orientation_z;
   float orientation_w;
+  float orientation_yaw;
 
   float goal_position_x;
   float goal_position_y;
@@ -131,17 +152,17 @@ private:
   float rate_control = 25; // Wheel encoders
   float rate_goal = 1;     // Wheel encoders
   // PID
-  float kp_ = 1.0f;
-  float ki_ = 1.0f;
-  float kd_ = 1.0f;
+  float kp_ = 0.2f;
+  float ki_ = 0.0f;
+  float kd_ = 0.01f;
   float max_windup_ = 1.0f;
-  float max_input_ = 1.0f;
+  float max_input_ = 0.5f;
   PIDController pid_;
   // TODO:
   // float control_input_x_ = pid_.computeControl(goal_position_x, position_x,
   // time_step)
   rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr vel_publisher;
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr twist_publisher;
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr
       subscription_scan;
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr
