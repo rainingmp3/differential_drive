@@ -1,4 +1,4 @@
-# ros_gz_example_gazebo
+# gazebo
 
 This subfolder holds example source files and a corresponding `CMakeLists.txt` file, as a starting point for compiling Gazebo implementations in a personal repository (i.e. not part of the official Gazebo source repositories).
 

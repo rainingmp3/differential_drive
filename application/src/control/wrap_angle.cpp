@@ -1,5 +1,6 @@
 #include <cmath>
-#inclide "wrapped_angle.hpp"
+#include "wrap_angle.hpp"
+
 const float PI = 3.14159265359;
 float wrapAngle(float angle_to_wrap)
 {
