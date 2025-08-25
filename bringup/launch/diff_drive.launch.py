@@ -30,9 +30,9 @@ def generate_launch_description():
     # Configure ROS nodes for launch
 
     # Setup project paths
-    pkg_project_bringup = get_package_share_directory("ros_gz_example_bringup")
-    pkg_project_gazebo = get_package_share_directory("ros_gz_example_gazebo")
-    pkg_project_description = get_package_share_directory("ros_gz_example_description")
+    pkg_project_bringup = get_package_share_directory("bringup")
+    pkg_project_gazebo = get_package_share_directory("gazebo")
+    pkg_project_description = get_package_share_directory("description")
     pkg_ros_gz_sim = get_package_share_directory("ros_gz_sim")
 
     # Load the SDF file from "description" package
@@ -55,7 +55,7 @@ def generate_launch_description():
     )
     # Publishes velocity
     controller = Node(
-        package="ros_gz_example_application",
+        package="application",
         executable="controller",
         name="controller",
         output="both",
@@ -93,7 +93,7 @@ def generate_launch_description():
         parameters=[
             {
                 "config_file": os.path.join(
-                    pkg_project_bringup, "config", "ros_gz_example_bridge.yaml"
+                    pkg_project_bringup, "config", "bridge.yaml"
                 ),
                 "qos_overrides./tf_static.publisher.durability": "transient_local",
             }

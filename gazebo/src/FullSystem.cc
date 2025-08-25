@@ -25,21 +25,21 @@
 #include <gz/plugin/Register.hh>
 
 // Don't forget to include the plugin's header.
-#include "ros_gz_example_gazebo/FullSystem.hh"
+#include "gazebo/FullSystem.hh"
 
 // This is required to register the plugin. Make sure the interfaces match
 // what's in the header.
 GZ_ADD_PLUGIN(
-    ros_gz_example_gazebo::FullSystem,
+    gazebo::FullSystem,
     gz::sim::System,
-    ros_gz_example_gazebo::FullSystem::ISystemConfigure,
-    ros_gz_example_gazebo::FullSystem::ISystemPreUpdate,
-    ros_gz_example_gazebo::FullSystem::ISystemUpdate,
-    ros_gz_example_gazebo::FullSystem::ISystemPostUpdate,
-    ros_gz_example_gazebo::FullSystem::ISystemReset
+    gazebo::FullSystem::ISystemConfigure,
+    gazebo::FullSystem::ISystemPreUpdate,
+    gazebo::FullSystem::ISystemUpdate,
+    gazebo::FullSystem::ISystemPostUpdate,
+    gazebo::FullSystem::ISystemReset
 )
 
-namespace ros_gz_example_gazebo 
+namespace gazebo 
 {
 
 void FullSystem::Configure(const gz::sim::Entity &_entity,
@@ -47,7 +47,7 @@ void FullSystem::Configure(const gz::sim::Entity &_entity,
                 gz::sim::EntityComponentManager &_ecm,
                 gz::sim::EventManager &_eventManager)
 {
-  gzdbg << "ros_gz_example_gazebo::FullSystem::Configure on entity: " << _entity << std::endl;
+  gzdbg << "gazebo::FullSystem::Configure on entity: " << _entity << std::endl;
 }
 
 void FullSystem::PreUpdate(const gz::sim::UpdateInfo &_info,
@@ -55,7 +55,7 @@ void FullSystem::PreUpdate(const gz::sim::UpdateInfo &_info,
 {
   if (!_info.paused && _info.iterations % 1000 == 0)
   {
-    gzdbg << "ros_gz_example_gazebo::FullSystem::PreUpdate" << std::endl;
+    gzdbg << "gazebo::FullSystem::PreUpdate" << std::endl;
   }
 }
 
@@ -64,7 +64,7 @@ void FullSystem::Update(const gz::sim::UpdateInfo &_info,
 {
   if (!_info.paused && _info.iterations % 1000 == 0)
   {
-    gzdbg << "ros_gz_example_gazebo::FullSystem::Update" << std::endl;
+    gzdbg << "gazebo::FullSystem::Update" << std::endl;
   }
 }
 
@@ -73,13 +73,13 @@ void FullSystem::PostUpdate(const gz::sim::UpdateInfo &_info,
 {
   if (!_info.paused && _info.iterations % 1000 == 0)
   {
-    gzdbg << "ros_gz_example_gazebo::FullSystem::PostUpdate" << std::endl;
+    gzdbg << "gazebo::FullSystem::PostUpdate" << std::endl;
   }
 }
 
 void FullSystem::Reset(const gz::sim::UpdateInfo &_info,
                        gz::sim::EntityComponentManager &_ecm)
 {
-  gzdbg << "ros_gz_example_gazebo::FullSystem::Reset" << std::endl;
+  gzdbg << "gazebo::FullSystem::Reset" << std::endl;
 }
-}  // namespace ros_gz_example_gazebo
+}  // namespace gazebo

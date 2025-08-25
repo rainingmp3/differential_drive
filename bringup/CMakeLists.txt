@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(ros_gz_example_bringup)
+project(bringup)
 
 find_package(ament_cmake REQUIRED)
-find_package(ros_gz_example_description REQUIRED)
-find_package(ros_gz_example_gazebo REQUIRED)
+find_package(description REQUIRED)
+find_package(gazebo REQUIRED)
 
 # Install project launch files
 install(
