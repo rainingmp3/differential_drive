@@ -24,9 +24,9 @@ ControllerNode::ControllerNode()
         atan2(goal_position_y - position_y, goal_position_x - position_x);
   };
 
-  auto timer_callback_ = [this]()
-  { this->publishLog(this->log_msg); }; // Subsciber part
   auto timer_logs_callback_ = [this]()
+  { this->publishLog(this->log_msg); }; // Subsciber part
+  auto timer_callback_ = [this]()
   { this->applyInputs(); }; // Subsciber part
 
   // TEST TEST TEST
