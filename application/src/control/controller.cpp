@@ -1,7 +1,9 @@
 #include "controller.hpp"
 #include "wrap_angle.hpp"
+#include <cmath>
 #include <rclcpp/logging.hpp>
 #include <sstream>
+#include <string>
 
 ControllerNode::ControllerNode()
     : Node("controller_node"), pid_(kp_, ki_, kd_, max_windup_, max_input_)
@@ -20,11 +22,10 @@ ControllerNode::ControllerNode()
 
     this->goal_yaw =
         atan2(goal_position_y - position_y, goal_position_x - position_x);
-    RCLCPP_ERROR(this->get_logger(), "goal yaw is %f degrees",
-                 goal_yaw * 180 / M_PI);
   };
 
-  auto timer_callback_ = [this]() { this->publishLog(this->log_msg); }; // Subsciber part
+  auto timer_callback_ = [this]()
+  { this->publishLog(this->log_msg); }; // Subsciber part
   auto timer_logs_callback_ = [this]()
   { this->applyInputs(); }; // Subsciber part
 
@@ -46,10 +47,11 @@ ControllerNode::ControllerNode()
 
     RCLCPP_WARN(this->get_logger(), "current yaw is %f", orientation_yaw);
   };
-  
 
-  log_msg <<  appendLogVariable("yaw",orientation_yaw * 180/M_PI) << 
-            appendLogVariable("goal yaw", goal_yaw* 180/M_PI);
+  std::string log_msg =
+      "yaw = " + std::to_string(orientation_yaw * 180 / M_PI) + "goal yaw is " +
+      std::to_string(goal_yaw * 180 / M_PI);
+
   twist_publisher = this->create_publisher<geometry_msgs::msg::Twist>(
       "/diff_drive/cmd_vel", rate_control);
 
@@ -74,7 +76,6 @@ void ControllerNode::publishTwist(float velocity, float angular_velocity)
   vel_msg.linear.x = velocity;
   vel_msg.angular.z = angular_velocity;
   twist_publisher->publish(vel_msg);
-  RCLCPP_WARN(this->get_logger(), "Published velocity %f [m/s]", velocity);
 }
 
 void ControllerNode::analyzeScan(
@@ -118,8 +119,9 @@ void ControllerNode::applyInputs()
   }
 }
 
-void ControllerNode::publishLog(std::stringstream){
-  RCLCPP_WARN(this->get_logger(), "%s", log_msg;
+void ControllerNode::publishLog(std::string &msg)
+{
+  RCLCPP_WARN(this->get_logger(), "%s", msg.c_str());
 }
 
 int main(int argc, char *argv[])

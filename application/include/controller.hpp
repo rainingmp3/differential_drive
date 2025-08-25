@@ -8,13 +8,12 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "std_msgs/msg/string.hpp"
-#include <array> #include <chrono>
+#include <chrono>
 #include <cstddef>
 #include <math.h>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/timer.hpp>
-#include <sstream>
 #include <string>
 
 using namespace std::chrono_literals;
@@ -32,13 +31,7 @@ private:
   float QuatToYaw(float qx, float qy, float qz, float qw);
 
   void applyInputs();
-
-  template <typename T> 
-  std::stringstream appendLogVariable(const std::string& variable_name,const T &variable){
-    std::stringstream msg = variable_name + "is" + variable + ";";
-  }
-
-  void publishLog(std::stringstream msg);
+  std::string log_msg; void publishLog(std::string& msg);
   // Set variables:
   bool obstacle_is_near = 0;
   float LIDAR_TO_FRONT =
@@ -64,8 +57,6 @@ private:
   float goal_qz;
   float goal_qw;
 
-  // Logs
-  std::stringstream log_msg;
   // Update rates [hz]
   float rate_lidar = 10;   // Lidar
   float rate_odom = 50;    // Wheel encoders
