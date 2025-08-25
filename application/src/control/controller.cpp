@@ -1,5 +1,9 @@
 #include "controller.hpp"
 #include "wrap_angle.hpp"
+#include <cmath>
+#include <rclcpp/logging.hpp>
+#include <sstream>
+#include <string>
 
 ControllerNode::ControllerNode()
     : Node("controller_node"), pid_(kp_, ki_, kd_, max_windup_, max_input_)
@@ -18,11 +22,15 @@ ControllerNode::ControllerNode()
 
     this->goal_yaw =
         atan2(goal_position_y - position_y, goal_position_x - position_x);
-    RCLCPP_ERROR(this->get_logger(), "goal yaw is %f", goal_yaw);
   };
 
-  auto timer_callback_ = [this]() { this->applyInputs(); }; // Subsciber part
+  auto timer_callback_ = [this]()
+  { this->publishLog(this->log_msg); }; // Subsciber part
+  auto timer_logs_callback_ = [this]()
+  { this->applyInputs(); }; // Subsciber part
 
+  // TEST TEST TEST
+  // TEST TEST TEST
   auto odom_callback_ = [this](const nav_msgs::msg::Odometry::SharedPtr msg)
   {
     this->position_x = msg->pose.pose.position.x;
@@ -40,10 +48,16 @@ ControllerNode::ControllerNode()
     RCLCPP_WARN(this->get_logger(), "current yaw is %f", orientation_yaw);
   };
 
+  std::string log_msg =
+      "yaw = " + std::to_string(orientation_yaw * 180 / M_PI) + "goal yaw is " +
+      std::to_string(goal_yaw * 180 / M_PI);
+
   twist_publisher = this->create_publisher<geometry_msgs::msg::Twist>(
       "/diff_drive/cmd_vel", rate_control);
 
   timer_ = this->create_wall_timer(40ms, timer_callback_); // TODO: avoid 25ms
+  timer_logs =
+      this->create_wall_timer(1000ms, timer_callback_); // TODO: avoid 25ms
 
   subscription_scan = this->create_subscription<sensor_msgs::msg::LaserScan>(
       "/diff_drive/scan", rate_lidar, laser_callback_);
@@ -62,7 +76,6 @@ void ControllerNode::publishTwist(float velocity, float angular_velocity)
   vel_msg.linear.x = velocity;
   vel_msg.angular.z = angular_velocity;
   twist_publisher->publish(vel_msg);
-  RCLCPP_WARN(this->get_logger(), "Published velocity %f [m/s]", velocity);
 }
 
 void ControllerNode::analyzeScan(
@@ -81,6 +94,7 @@ float ControllerNode::QuatToYaw(float qx, float qy, float qz, float qw)
 {
   float yaw = atan2(2.0 * (qw * qz + qx * qy),
                     1.0 - 2.0 * (qy * qy + qz * qz)); // TODO: learn it pls
+  yaw = wrapAngle(yaw);
   return yaw;
 }
 
@@ -104,6 +118,12 @@ void ControllerNode::applyInputs()
     this->publishTwist(control_velocity, control_yaw_velocity);
   }
 }
+
+void ControllerNode::publishLog(std::string &msg)
+{
+  RCLCPP_WARN(this->get_logger(), "%s", msg.c_str());
+}
+
 int main(int argc, char *argv[])
 {
   rclcpp::init(argc, argv);

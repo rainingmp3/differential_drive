@@ -7,12 +7,14 @@
 #include "pid.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
+#include "std_msgs/msg/string.hpp"
 #include <chrono>
 #include <cstddef>
 #include <math.h>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/timer.hpp>
+#include <string>
 
 using namespace std::chrono_literals;
 
@@ -29,11 +31,11 @@ private:
   float QuatToYaw(float qx, float qy, float qz, float qw);
 
   void applyInputs();
-
+  std::string log_msg; void publishLog(std::string& msg);
   // Set variables:
   bool obstacle_is_near = 0;
   float LIDAR_TO_FRONT =
-      0.854283f; // Distance from Lidar to the front of the car.
+      0.854283f; // Distance from Lidar to the front of the car.;
   float desired_velocity = 5.0f;
   float position_x;
   float position_y;
@@ -68,8 +70,10 @@ private:
   float max_input_ = 0.5f;
   PIDController pid_;
 
-  rclcpp::TimerBase::SharedPtr timer_; // TODO: learn why its real
+  rclcpp::TimerBase::SharedPtr timer_logs;
+  rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr twist_publisher;
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr log_publisher;
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr
       subscription_scan;
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr
