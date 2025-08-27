@@ -1,77 +1,26 @@
-# ros_gz_project_template
-A template project integrating ROS 2 and Gazebo simulator.
+# Differential Drive Controller
 
-## Included packages
+This is my Differential Drive Controller project in **ROS2 Jazzy**, built for learning purposes.  
+The project template is borrowed from the [official ros_gz_project_template](https://github.com/gazebosim/ros_gz_project_template), which integrates **ROS2** and **Gazebo**.
 
-* `description` - holds the sdf description of the simulated system and any other assets.
+## About
 
-* `gazebo` - holds gazebo specific code and configurations. Namely this is where systems end up.
+I am **not** using `nav2` or `ros2_control` because my goal is to learn **navigation concepts** by implementing them from scratch, rather than just using existing APIs.  
+This approach keeps things less overwhelming and helps me build a deeper understanding of the fundamentals.
 
-* `application` - holds ros2 specific code and configurations.
+## Quickstart
 
-* `bringup` - holds launch files and high level utilities.
+Installation process described in [INSTALL.md]()
 
+# Goals
 
-## Install
+- [x] Basic control over vehicle
+- [ ] Obstacle perception
+- [ ] Obstacle avoidance
+- [ ] Basic Behaviour Tree
 
-For using the template with Gazebo Fortress switch to the `fortress` branch of this repository, otherwise use the default branch `main` for Gazebo Harmonic onwards.
+## Tech Stack 
 
-### Requirements
-
-1. Choose a ROS and Gazebo combination https://gazebosim.org/docs/latest/ros_installation
-
-   Note: If you're using a specific and unsupported Gazebo version with ROS 2, you might need to set the `GZ_VERSION` environment variable, for example:
-
-    ```bash
-    export GZ_VERSION=harmonic
-    ```
-    Also need to build [`ros_gz`](https://github.com/gazebosim/ros_gz) and [`sdformat_urdf`](https://github.com/ros/sdformat_urdf) from source if binaries are not available for your chosen combination.
-
-1. Install necessary tools
-
-    ```bash
-    sudo apt install python3-vcstool python3-colcon-common-extensions git wget
-    ```
-
-### Use as template
-Directly `Use this template` and create your project repository on Github.
-
-Or start by creating a workspace and cloning the template repository:
-
-   ```bash
-   mkdir -p ~/template_ws/src
-   cd ~/template_ws/src
-   git clone https://github.com/gazebosim/ros_gz_project_template.git
-   ```
-
-## Usage
-
-1. Install dependencies
-
-    ```bash
-    cd ~/template_ws
-    source /opt/ros/$ROS_DISTRO/setup.bash
-    sudo rosdep init
-    rosdep update
-    rosdep install --from-paths src --ignore-src -r -i -y --rosdistro <ROS_DISTRO>
-    ```
-
-1. Build the project
-
-    ```bash
-    colcon build --cmake-args -DBUILD_TESTING=ON
-    ```
-
-1. Source the workspace
-
-    ```bash
-    . ~/template_ws/install/setup.sh
-    ```
-
-1. Launch the simulation
-
-    ```bash
-    ros2 launch bringup diff_drive.launch.py
-    ```
-
-For a more detailed guide on using this template see [documentation](https://gazebosim.org/docs/latest/ros_gz_project_template_guide).
+- ROS2 Jazzy Jalisco
+- Gazebo Harmonic
+- C++/Python
