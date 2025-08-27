@@ -27,10 +27,13 @@ ControllerNode::ControllerNode()
   auto timer_logs_callback_ = [this]()
   {
     std::string log_msg =
-        "yaw = " + std::to_string(this->orientation_yaw * 180 / M_PI) +
-        " goal yaw = " + std::to_string(this->goal_yaw * 180 / M_PI) +
-        " position_x = " + std::to_string(this->position_x) +
-        " goal position_x = " + std::to_string(this->goal_position_x);
+
+        "bool = " + std::to_string(obstacle_is_near);
+    // Angular issues
+    // "yaw = " + std::to_string(this->orientation_yaw * 180 / M_PI) +
+    // " goal yaw = " + std::to_string(this->goal_yaw * 180 / M_PI) +
+    // " position_x = " + std::to_string(this->position_x) +
+    // " goal position_x = " + std::to_string(this->goal_position_x);
 
     this->publishLog(log_msg);
   }; // Subsciber part
@@ -89,7 +92,11 @@ void ControllerNode::analyzeScan(
   if (distance_forward < LIDAR_TO_FRONT + 0.5)
   {
     RCLCPP_INFO_ONCE(this->get_logger(), "WE SURPRASSED IT");
-    this->desired_velocity = 0.0f;
+    obstacle_is_near = true;
+  }
+  else
+  {
+    obstacle_is_near = false;
   }
 }
 float ControllerNode::QuatToYaw(float qx, float qy, float qz, float qw)
@@ -108,19 +115,14 @@ void ControllerNode::applyInputs()
   float control_yaw_velocity =
       pid_.computeControl(goal_yaw, orientation_yaw, rate_control);
 
-  this->publishTwist(control_velocity, control_yaw_velocity);
-  //   // this->publishTwist(control_velocity, 0);
-  // if (obstacle_is_near)
-  // {
-  //   this->publishTwist(desired_velocity, control_yaw_velocity);
-  //   // this->publishTwist(desired_velocity, 0);
-  // }
-  // else
-  // {
-  //
-  //   this->publishTwist(control_velocity, control_yaw_velocity);
-  //   // this->publishTwist(control_velocity, 0);
-  // }
+  if (obstacle_is_near)
+  {
+    this->publishTwist(back_velocity, 0);
+  }
+  else
+  {
+    this->publishTwist(control_velocity, control_yaw_velocity);
+  }
 }
 
 void ControllerNode::publishLog(std::string &msg)

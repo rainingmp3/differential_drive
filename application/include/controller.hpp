@@ -37,7 +37,7 @@ private:
   bool obstacle_is_near = 0;
   float LIDAR_TO_FRONT =
       0.854283f; // Distance from Lidar to the front of the car.;
-  float desired_velocity = 5.0f;
+  float back_velocity = -1.0f;
   float position_x;
   float position_y;
   float position_z;

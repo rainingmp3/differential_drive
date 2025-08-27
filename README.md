@@ -12,7 +12,7 @@ This approach keeps things less overwhelming and helps me build a deeper underst
 
 Installation process described in [INSTALL.md]()
 
-# Goals
+## Goals
 
 - [x] Basic control over vehicle
 - [ ] Obstacle perception
