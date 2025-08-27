@@ -20,14 +20,22 @@ ControllerNode::ControllerNode()
     this->goal_position_y = msg->pose.position.y;
     this->goal_position_z = msg->pose.position.z;
 
-    this->goal_yaw =
-        atan2(goal_position_y - position_y, goal_position_x - position_x);
+    this->goal_yaw = wrapAngle(
+        atan2(goal_position_y - position_y, goal_position_x - position_x));
   };
 
   auto timer_logs_callback_ = [this]()
-  { this->publishLog(this->log_msg); }; // Subsciber part
-  auto timer_callback_ = [this]()
-  { this->applyInputs(); }; // Subsciber part
+  {
+    std::string log_msg =
+        "yaw = " + std::to_string(this->orientation_yaw * 180 / M_PI) +
+        " goal yaw = " + std::to_string(this->goal_yaw * 180 / M_PI) +
+        " position_x = " + std::to_string(this->position_x) +
+        " goal position_x = " + std::to_string(this->goal_position_x);
+
+    this->publishLog(log_msg);
+  }; // Subsciber part
+
+  auto timer_callback_ = [this]() { this->applyInputs(); }; // Subsciber part
 
   // TEST TEST TEST
   // TEST TEST TEST
@@ -44,20 +52,14 @@ ControllerNode::ControllerNode()
 
     this->orientation_yaw =
         QuatToYaw(orientation_x, orientation_y, orientation_z, orientation_w);
-
-    RCLCPP_WARN(this->get_logger(), "current yaw is %f", orientation_yaw);
   };
-
-  std::string log_msg =
-      "yaw = " + std::to_string(orientation_yaw * 180 / M_PI) + "goal yaw is " +
-      std::to_string(goal_yaw * 180 / M_PI);
 
   twist_publisher = this->create_publisher<geometry_msgs::msg::Twist>(
       "/diff_drive/cmd_vel", rate_control);
 
   timer_ = this->create_wall_timer(40ms, timer_callback_); // TODO: avoid 25ms
   timer_logs =
-      this->create_wall_timer(1000ms, timer_callback_); // TODO: avoid 25ms
+      this->create_wall_timer(1000ms, timer_logs_callback_); // TODO: avoid 25ms
 
   subscription_scan = this->create_subscription<sensor_msgs::msg::LaserScan>(
       "/diff_drive/scan", rate_lidar, laser_callback_);
@@ -83,7 +85,7 @@ void ControllerNode::analyzeScan(
 {
   size_t middle_index = msg->ranges.size() / 2;
   float distance_forward = msg->ranges[middle_index] - LIDAR_TO_FRONT;
-  RCLCPP_WARN(this->get_logger(), "Distance is  %f [m]", distance_forward);
+  // RCLCPP_WARN(this->get_logger(), "Distance is  %f [m]", distance_forward);
   if (distance_forward < LIDAR_TO_FRONT + 0.5)
   {
     RCLCPP_INFO_ONCE(this->get_logger(), "WE SURPRASSED IT");
@@ -94,7 +96,7 @@ float ControllerNode::QuatToYaw(float qx, float qy, float qz, float qw)
 {
   float yaw = atan2(2.0 * (qw * qz + qx * qy),
                     1.0 - 2.0 * (qy * qy + qz * qz)); // TODO: learn it pls
-  yaw = wrapAngle(yaw);
+  yaw = (yaw);
   return yaw;
 }
 
@@ -106,17 +108,19 @@ void ControllerNode::applyInputs()
   float control_yaw_velocity =
       pid_.computeControl(goal_yaw, orientation_yaw, rate_control);
 
-  RCLCPP_WARN(this->get_logger(), "control angular_velocity is %f",
-              control_yaw_velocity);
-  if (obstacle_is_near)
-  {
-    this->publishTwist(desired_velocity, control_yaw_velocity);
-  }
-  else
-  {
-
-    this->publishTwist(control_velocity, control_yaw_velocity);
-  }
+  this->publishTwist(control_velocity, control_yaw_velocity);
+  //   // this->publishTwist(control_velocity, 0);
+  // if (obstacle_is_near)
+  // {
+  //   this->publishTwist(desired_velocity, control_yaw_velocity);
+  //   // this->publishTwist(desired_velocity, 0);
+  // }
+  // else
+  // {
+  //
+  //   this->publishTwist(control_velocity, control_yaw_velocity);
+  //   // this->publishTwist(control_velocity, 0);
+  // }
 }
 
 void ControllerNode::publishLog(std::string &msg)

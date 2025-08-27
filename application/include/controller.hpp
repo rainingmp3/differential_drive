@@ -31,7 +31,7 @@ private:
   float QuatToYaw(float qx, float qy, float qz, float qw);
 
   void applyInputs();
-  std::string log_msg;
+  // std::string log_msg;
   void publishLog(std::string &msg);
   // Set variables:
   bool obstacle_is_near = 0;

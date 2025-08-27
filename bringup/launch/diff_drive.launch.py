@@ -50,7 +50,8 @@ def generate_launch_description():
         launch_arguments={
             "gz_args": PathJoinSubstitution(
                 [pkg_project_gazebo, "worlds", "diff_drive.sdf"]
-            )
+            ),
+            "args": "-r",
         }.items(),
     )
     # Publishes velocity
@@ -110,6 +111,6 @@ def generate_launch_description():
             bridge,
             robot_state_publisher,
             rviz,
-            controller
+            controller,
         ]
     )
