@@ -1,9 +1,5 @@
 #include "controller.hpp"
-#include "wrap_angle.hpp"
 #include <cmath>
-#include <rclcpp/logging.hpp>
-#include <sstream>
-#include <string>
 
 ControllerNode::ControllerNode()
     : Node("controller_node"), pid_(kp_, ki_, kd_, max_windup_, max_input_)
@@ -11,7 +7,10 @@ ControllerNode::ControllerNode()
 {
   auto laser_callback_ =
       [this](const sensor_msgs::msg::LaserScan::SharedPtr msg)
-  { this->analyzeScan(msg); };
+  {
+    this->lidar_points.clear();
+    this->analyzeScan(msg);
+  };
 
   auto goal_callback_ =
       [this](const geometry_msgs::msg::PoseStamped::SharedPtr msg)
@@ -26,9 +25,9 @@ ControllerNode::ControllerNode()
 
   auto timer_logs_callback_ = [this]()
   {
-    std::string log_msg =
-
-        "bool = " + std::to_string(obstacle_is_near);
+    // std::string log_msg =
+    //
+    //     "bool = " + std::to_string(obstacle_is_near);
     // Angular issues
     // "yaw = " + std::to_string(this->orientation_yaw * 180 / M_PI) +
     // " goal yaw = " + std::to_string(this->goal_yaw * 180 / M_PI) +
@@ -86,18 +85,34 @@ void ControllerNode::publishTwist(float velocity, float angular_velocity)
 void ControllerNode::analyzeScan(
     const sensor_msgs::msg::LaserScan::SharedPtr msg)
 {
-  size_t middle_index = msg->ranges.size() / 2;
-  float distance_forward = msg->ranges[middle_index] - LIDAR_TO_FRONT;
-  // RCLCPP_WARN(this->get_logger(), "Distance is  %f [m]", distance_forward);
-  if (distance_forward < LIDAR_TO_FRONT + 0.5)
+  size_t max_index = msg->ranges.size();
+  float min_angle = msg->angle_min;
+  float angle_increment = msg->angle_increment;
+
+  for (int i; i < max_index; ++i)
   {
-    RCLCPP_INFO_ONCE(this->get_logger(), "WE SURPRASSED IT");
-    obstacle_is_near = true;
+    if (std::isnormal(msg->ranges[i]))
+    {
+      LidarPoint point;
+      point.distance = msg->ranges[i];
+      point.angle = min_angle + angle_increment * i;
+      lidar_points.push_back(point);
+    }
   }
-  else
-  {
-    obstacle_is_near = false;
-  }
+
+  RCLCPP_WARN(this->get_logger(), "Right angle is %f ; right angle is %f",
+              lidar_points[0].angle * 180/M_PI,
+              lidar_points[lidar_points.size() - 1].angle * 180/M_PI);
+  // this->log_msg = std::to_string(distance_max) + " " + //inf - sleva
+  // if (distance_forward < LIDAR_TO_FRONT + 0.5)
+  // {
+  //   RCLCPP_INFO_ONCE(this->get_logger(), "WE SURPRASSED IT");
+  //   obstacle_is_near = true;
+  // }
+  // else
+  // {
+  //   obstacle_is_near = false;
+  // }
 }
 float ControllerNode::QuatToYaw(float qx, float qy, float qz, float qw)
 {
@@ -115,14 +130,15 @@ void ControllerNode::applyInputs()
   float control_yaw_velocity =
       pid_.computeControl(goal_yaw, orientation_yaw, rate_control);
 
-  if (obstacle_is_near)
-  {
-    this->publishTwist(back_velocity, 0);
-  }
-  else
-  {
-    this->publishTwist(control_velocity, control_yaw_velocity);
-  }
+  this->publishTwist(control_velocity, control_yaw_velocity);
+  // if (obstacle_is_near)
+  // {
+  //   this->publishTwist(back_velocity, 0);
+  // }
+  // else
+  // {
+  //   this->publishTwist(control_velocity, control_yaw_velocity);
+  // }
 }
 
 void ControllerNode::publishLog(std::string &msg)
