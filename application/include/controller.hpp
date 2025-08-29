@@ -5,16 +5,17 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "pid.hpp"
+#include "wrap_angle.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "std_msgs/msg/string.hpp"
 #include <chrono>
 #include <cstddef>
 #include <math.h>
-#include <rclcpp/logging.hpp>
-#include <rclcpp/node.hpp>
-#include <rclcpp/timer.hpp>
+#include <algorithm>
 #include <string>
+#include <vector>
+#include <limits>
 
 using namespace std::chrono_literals;
 
@@ -31,13 +32,20 @@ private:
   float QuatToYaw(float qx, float qy, float qz, float qw);
 
   void applyInputs();
-  // std::string log_msg;
+  std::string log_msg;
   void publishLog(std::string &msg);
   // Set variables:
   bool obstacle_is_near = 0;
   float LIDAR_TO_FRONT =
       0.854283f; // Distance from Lidar to the front of the car.;
   float back_velocity = -1.0f;
+
+  struct LidarPoint {
+    float angle;
+    float distance;
+  };
+
+  std::vector<LidarPoint> lidar_points;
   float position_x;
   float position_y;
   float position_z;
