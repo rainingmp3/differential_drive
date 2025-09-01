@@ -5,17 +5,19 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "pid.hpp"
-#include "wrap_angle.hpp"
+#include "potential_field.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "wrap_angle.hpp"
+#include <Eigen/src/Core/Matrix.h>
+#include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <limits>
 #include <math.h>
-#include <algorithm>
 #include <string>
 #include <vector>
-#include <limits>
 
 using namespace std::chrono_literals;
 
@@ -40,31 +42,33 @@ private:
       0.854283f; // Distance from Lidar to the front of the car.;
   float back_velocity = -1.0f;
 
-  struct LidarPoint {
+  size_t max_index;
+  struct LidarPoint
+  {
     float angle;
     float distance;
   };
-
+  Eigen::Vector2f sum_repulsive_force = Eigen::Vector2f(0, 0);
   std::vector<LidarPoint> lidar_points;
-  float position_x;
-  float position_y;
-  float position_z;
+  float position_x = 0.0f;
+  float position_y = 0.0f;
+  float position_z = 0.0f;
 
-  float orientation_x;
-  float orientation_y;
-  float orientation_z;
-  float orientation_w;
-  float orientation_yaw;
+  float orientation_x = 0.0f;
+  float orientation_y = 0.0f;
+  float orientation_z = 0.0f;
+  float orientation_w = 0.0f;
+  float orientation_yaw = 0.0f;
 
-  float goal_position_x;
-  float goal_position_y;
-  float goal_position_z;
+  bool goal_is_set = false;
+  float goal_position_x = position_x;
+  float goal_position_y = position_y;
   float goal_yaw;
 
-  float goal_qx;
-  float goal_qy;
-  float goal_qz;
-  float goal_qw;
+  float goal_qx = 0.0f;
+  float goal_qy = 0.0f;
+  float goal_qz = 0.0f;
+  float goal_qw = 0.0f;
 
   // Update rates [hz]
   float rate_lidar = 10;   // Lidar
@@ -78,6 +82,13 @@ private:
   float max_windup_ = 1.0f;
   float max_input_ = 0.5f;
   PIDController pid_;
+
+  // PF
+  float ka_ = 100.0f;
+  float kr_ = 0.001f;
+  float kpf_ = 0.01f;
+  float g_star_ = 0.9f;
+  PotentialField pf_;
 
   rclcpp::TimerBase::SharedPtr timer_logs;
   rclcpp::TimerBase::SharedPtr timer_;
