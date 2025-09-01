@@ -15,7 +15,7 @@ Installation process described in [INSTALL.md]()
 ## Goals
 
 - [x] Basic control over vehicle
-- [ ] Obstacle perception
+- [x] Obstacle perception
 - [ ] Obstacle avoidance
 - [ ] Basic Behaviour Tree
 

@@ -24,23 +24,10 @@ ControllerNode::ControllerNode()
   };
 
   auto timer_logs_callback_ = [this]()
-  {
-    // std::string log_msg =
-    //
-    //     "bool = " + std::to_string(obstacle_is_near);
-    // Angular issues
-    // "yaw = " + std::to_string(this->orientation_yaw * 180 / M_PI) +
-    // " goal yaw = " + std::to_string(this->goal_yaw * 180 / M_PI) +
-    // " position_x = " + std::to_string(this->position_x) +
-    // " goal position_x = " + std::to_string(this->goal_position_x);
-
-    this->publishLog(log_msg);
-  }; // Subsciber part
+  { this->publishLog(log_msg); }; // Subsciber part
 
   auto timer_callback_ = [this]() { this->applyInputs(); }; // Subsciber part
 
-  // TEST TEST TEST
-  // TEST TEST TEST
   auto odom_callback_ = [this](const nav_msgs::msg::Odometry::SharedPtr msg)
   {
     this->position_x = msg->pose.pose.position.x;
@@ -101,18 +88,8 @@ void ControllerNode::analyzeScan(
   }
 
   RCLCPP_WARN(this->get_logger(), "Right angle is %f ; right angle is %f",
-              lidar_points[0].angle * 180/M_PI,
-              lidar_points[lidar_points.size() - 1].angle * 180/M_PI);
-  // this->log_msg = std::to_string(distance_max) + " " + //inf - sleva
-  // if (distance_forward < LIDAR_TO_FRONT + 0.5)
-  // {
-  //   RCLCPP_INFO_ONCE(this->get_logger(), "WE SURPRASSED IT");
-  //   obstacle_is_near = true;
-  // }
-  // else
-  // {
-  //   obstacle_is_near = false;
-  // }
+              lidar_points[0].angle * 180 / M_PI,
+              lidar_points[lidar_points.size() - 1].angle * 180 / M_PI);
 }
 float ControllerNode::QuatToYaw(float qx, float qy, float qz, float qw)
 {
@@ -131,14 +108,6 @@ void ControllerNode::applyInputs()
       pid_.computeControl(goal_yaw, orientation_yaw, rate_control);
 
   this->publishTwist(control_velocity, control_yaw_velocity);
-  // if (obstacle_is_near)
-  // {
-  //   this->publishTwist(back_velocity, 0);
-  // }
-  // else
-  // {
-  //   this->publishTwist(control_velocity, control_yaw_velocity);
-  // }
 }
 
 void ControllerNode::publishLog(std::string &msg)
