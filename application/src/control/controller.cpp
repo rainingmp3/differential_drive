@@ -131,12 +131,12 @@ void ControllerNode::applyInputs()
     Eigen::Vector2f twist =
         pf_.computeTwist(attractive_force, Eigen::Vector2f(0, 0));
 
-    float control_velocity = 0.1 * twist(0);
+    float control_velocity = 0.5 * twist(0);
 
-    float control_yaw_velocity = 0.5 * wrapAngle(twist(1));
+    float control_yaw_velocity = 0.5 * wrapAngle(twist(1) - orientation_yaw);
 
-    RCLCPP_WARN(this->get_logger(), "af = %f goal = %f posx = %f",
-                attractive_force(0), goal_position_x, position_x);
+    RCLCPP_WARN(this->get_logger(), "yaw= %f,(v:%f,a:%f)", goal_yaw, twist(0),
+                twist(1));
     this->publishTwist(control_velocity, control_yaw_velocity);
   }
 }
