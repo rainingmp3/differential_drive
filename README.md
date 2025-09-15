@@ -28,4 +28,4 @@ Installation process described in [INSTALL.md]()
 - C++/Python
 
 LQR implementation:
-2025-09-15 18-51-45.gif
+![](https://github.com/rainingmp3/differential_drive/blob/main/docs/Screencast%20from%202025-09-15%2018-51-45.gif)
