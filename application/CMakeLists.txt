@@ -15,8 +15,8 @@ find_package(Eigen3 REQUIRED)
 # Put reusable code (PID, potential field, utils) into a static library
 add_library(control_lib
   src/control/pid.cpp
-  src/control/potential_field.cpp
   src/control/wrap_angle.cpp
+  src/control/lqr.cpp
 )
 
 # Link ROS2 dependencies to the library
