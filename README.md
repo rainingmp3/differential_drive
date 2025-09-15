@@ -15,8 +15,10 @@ Installation process described in [INSTALL.md]()
 ## Goals
 
 - [x] Basic control over vehicle
-- [ ] Obstacle perception
-- [ ] Obstacle avoidance
+  -[x] PID version
+  -[x] LQR version
+  -[ ] MPC controller
+- [x] Obstacle perception & [ ] Obstacle avoidance
 - [ ] Basic Behaviour Tree
 
 ## Tech Stack 
@@ -24,3 +26,6 @@ Installation process described in [INSTALL.md]()
 - ROS2 Jazzy Jalisco
 - Gazebo Harmonic
 - C++/Python
+
+LQR implementation:
+2025-09-15 18-51-45.gif
