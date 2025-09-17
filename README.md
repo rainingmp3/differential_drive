@@ -18,7 +18,7 @@ Installation process described in [INSTALL.md]()
   - [x] PID version
   - [x] LQR version
   - [ ] MPC controller
-- [x] Obstacle perception & [ ] Obstacle avoidance
+- [x] Obstacle perception & - [ ] Obstacle avoidance
 - [ ] Basic Behaviour Tree
 
 ## Tech Stack 
@@ -27,5 +27,5 @@ Installation process described in [INSTALL.md]()
 - Gazebo Harmonic
 - C++/Python
 
-## LQR implementation: \
+## LQR implementation: 
 ![](https://github.com/rainingmp3/differential_drive/blob/main/docs/Screencast%20from%202025-09-15%2018-51-45.gif)
