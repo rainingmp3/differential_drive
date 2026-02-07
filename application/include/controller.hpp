@@ -20,8 +20,7 @@
 #include <vector>
 
 using namespace std::chrono_literals;
-class ControllerNode : public rclcpp::Node
-{
+class ControllerNode : public rclcpp::Node {
 public:
   ControllerNode();
 
@@ -38,45 +37,52 @@ private:
   float LIDAR_TO_FRONT =
       0.854283f; // Distance from Lidar to the front of the car.;
 
-  struct LidarPoint
-  {
+  struct LidarPoint {
     float angle;
     float distance;
   };
 
   std::vector<LidarPoint> lidar_points;
-  float position_x;
-  float position_y;
-  float position_z;
+  float position_x = 0;
+  float position_y = 0;
+  float position_z = 0;
 
-  float orientation_x;
-  float orientation_y;
-  float orientation_z;
-  float orientation_w;
-  float orientation_yaw;
+  float orientation_x = 0;
+  float orientation_y = 0;
+  float orientation_z = 0;
+  float orientation_w = 0;
+  float orientation_yaw = 0;
 
-  float goal_position_x;
-  float goal_position_y;
-  float goal_position_z;
-  float goal_yaw;
+  float goal_position_x = 0;
+  float goal_position_y = 0;
+  float goal_position_z = 0;
+  float goal_yaw = 0;
 
-  float goal_qx;
-  float goal_qy;
-  float goal_qz;
-  float goal_qw;
+  float goal_qx = 0;
+  float goal_qy = 0;
+  float goal_qz = 0;
+  float goal_qw = 0;
 
   // Update rates [hz]
   float rate_lidar = 10;   // Lidar
   float rate_odom = 50;    // Wheel encoders
   float rate_control = 25; // Wheel encoders
   float rate_goal = 1;     // Wheel encoders
-  // PID
-  float kp_ = 0.2f;
-  float ki_ = 0.0f;
-  float kd_ = 0.01f;
-  float max_windup_ = 1.0f;
-  float max_input_ = 0.5f;
-  PIDController pid_;
+  // PID linear
+  float kp_lin = 0.8f;
+  float ki_lin = 0.1f;
+  float kd_lin = 0.2f;
+  float max_windup_lin = 1.0f;
+  float max_input_lin = 0.5f;
+  // PID angular
+  float kp_ang = 0.8f;
+  float ki_ang = 0.1f;
+  float kd_ang = 0.2f;
+  float max_windup_ang = 1.0f;
+  float max_input_ang = 0.5f;
+  float time_step = 0.04;
+  PIDController pid_linear_;
+  PIDController pid_angular_;
   LQR lqr_;
   Eigen::Matrix3f A;
   Matrix3f Q;
